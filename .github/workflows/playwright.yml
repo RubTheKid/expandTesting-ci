@@ -1,0 +1,92 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ 'test' ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+      - name: Run Playwright tests
+        run: npx playwright test
+
+  create-pr:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ needs.test.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          fetch-depth: 0
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ACTIONS_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const head = 'test';
+            const base = 'main';
+
+            try {
+              // Check if PR already exists
+              const prs = await github.rest.pulls.list({
+                owner, repo, state: 'open', head: `${owner}:${head}`, base
+              });
+              
+              if (prs.data.length > 0) {
+                core.info('PR already exists. Skipping creation.');
+                return;
+              }
+
+              // Create the PR
+              const prBody = 'This PR was automatically created after successful test execution on the test branch.\n\n' +
+                           '## All Playwright tests passed successfully\n\n';
+              
+              const pr = await github.rest.pulls.create({
+                owner, repo,
+                title: 'Test Results: Automated PR from test branch',
+                head, base,
+                body: prBody
+              });
+              core.info(`PR created: ${pr.data.html_url}`);
+              
+            } catch (error) {
+              core.error(`Failed to create PR: ${error.message}`);
+              throw error;
+            }
