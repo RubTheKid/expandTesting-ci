@@ -3,6 +3,7 @@
     "playwright": "^1.56.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@playwright/test": "^1.56.0",
     "@types/node": "^24.7.0"
   },
