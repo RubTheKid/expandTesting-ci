@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 import LoginHelpers from './helpers/login.helpers';
 import { LOGIN_DATA } from './test-data/login.data';
 
