@@ -7,7 +7,7 @@ const rh = new RegisterHelpers();
 const lh = new LoginHelpers();
 
 test.describe('Register and Login Integration', () => {
-    test.only('should register and login successfully', async({page}) => {
+    test('should register and login successfully', async({page}) => {
         const username = FakerHelpers.generateUsername();
         const password = FakerHelpers.generatePassword();
         const confirmPassword = password;
