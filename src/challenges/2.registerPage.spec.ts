@@ -5,29 +5,29 @@ import RegisterHelpers from './helpers/register.helpers';
 const rh = new RegisterHelpers();
 
 test.describe('Register Page', () => {
-    test('should register successfully', async({page}) => {
+    test('should register successfully', async ({ page }) => {
         await rh.navigateToRegisterPage(page);
 
         const username = FakerHelpers.generateUsername();
         const password = FakerHelpers.generatePassword();
         const confirmPassword = password;
-        
+
         await rh.register(page, username, password, confirmPassword);
         await rh.expectRegisterSuccess(page);
     })
 
-    test('should not register due to invalid confirm password', async({page}) => {
+    test('should not register due to invalid confirm password', async ({ page }) => {
         await rh.navigateToRegisterPage(page);
 
         const username = FakerHelpers.generateUsername();
         const password = FakerHelpers.generatePassword();
         const confirmPassword = 'differentPassword';
-        
+
         await rh.register(page, username, password, confirmPassword);
         await rh.expectError(page);
     })
 
-    test('should not register due to empty password', async({page}) => {
+    test('should not register due to empty password', async ({ page }) => {
         await rh.navigateToRegisterPage(page);
 
         const username = FakerHelpers.generateUsername();
@@ -38,7 +38,7 @@ test.describe('Register Page', () => {
         await rh.expectError(page);
     })
 
-    test('should not register due to empty username', async({page}) => {
+    test('should not register due to empty username', async ({ page }) => {
         await rh.navigateToRegisterPage(page);
 
         const username = '';
@@ -49,7 +49,7 @@ test.describe('Register Page', () => {
         await rh.expectError(page);
     })
 
-    test('should not register due to invalid username', async({page}) => {
+    test('should not register due to invalid username', async ({ page }) => {
         await rh.navigateToRegisterPage(page);
 
         const username = 'UserTEST-123-';
@@ -57,7 +57,7 @@ test.describe('Register Page', () => {
         const confirmPassword = password;
 
         await rh.register(page, username, password, confirmPassword);
-        
+
         await rh.expectError(page);
     })
 })
